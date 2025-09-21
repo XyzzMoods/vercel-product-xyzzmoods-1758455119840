@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product - XyzzMoods</title>
+  <style>
+    * {margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;}
+    body {color:#fff;background:#000;overflow-x:hidden;}
+
+    /* CANVAS BACKGROUND */
+    #particles {
+      position:fixed;
+      top:0;left:0;
+      width:100vw;height:100vh;
+      z-index:-2;
+      background:radial-gradient(circle at 30% 30%, rgba(155,0,255,0.4), transparent 60%),
+                  radial-gradient(circle at 70% 60%, rgba(0,200,255,0.3), transparent 70%),
+                  radial-gradient(circle at 50% 80%, rgba(200,0,200,0.25), transparent 70%),
+                  #000;
+    }
+
+    /* CONTAINER */
+    .container {max-width:1000px;margin:0 auto;padding:6rem 1rem 8rem;}
+
+    /* PRODUCT GRID */
+    .product-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+      gap:1.5rem;
+    }
+    .card {
+      background:rgba(20,20,35,0.7);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:15px;
+      padding:1.2rem;
+      box-shadow:0 0 15px rgba(128,0,255,0.3);
+      transition:transform .2s;
+    }
+    .card:hover {transform:translateY(-5px);}
+    .card h3 {margin-bottom:.5rem;color:#b388ff;}
+    .price {font-weight:bold;margin:.5rem 0;}
+    .btn {
+      padding:.5rem .9rem;
+      border:none;
+      border-radius:8px;
+      background:#7b2ff7;
+      color:#fff;
+      cursor:pointer;
+      font-size:.85rem;
+      transition:background .2s;
+    }
+    .btn:hover {background:#9d4edd;}
+
+    /* SPOTIFY */
+    .spotify {
+      margin:2rem 0;
+      border-radius:12px;
+      overflow:hidden;
+      box-shadow:0 0 15px rgba(155,0,255,0.4);
+    }
+
+    /* CART */
+    #cartPage {display:none;}
+    .cart-list {margin-top:1rem;}
+    .cart-item {
+      background:rgba(20,20,35,0.8);
+      border-radius:10px;
+      padding:1rem;
+      margin-bottom:1rem;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:.5rem;
+      flex-wrap:wrap;
+    }
+    .cart-item h4 {color:#b388ff;}
+    .cart-buttons {
+      display:flex;
+      gap:.4rem;
+    }
+
+    /* STATUS BAR */
+    .status-bar {
+      position:fixed;
+      bottom:0;left:0;width:100%;
+      background:rgba(10,10,25,0.9);
+      border-top:1px solid rgba(255,255,255,0.1);
+      display:flex;
+      justify-content:space-around;
+      align-items:center;
+      padding:.4rem 0;
+      z-index:100;
+    }
+    .status-bar button {
+      background:none;
+      border:none;
+      cursor:pointer;
+      fill:#aaa;
+      transition:fill .2s;
+    }
+    .status-bar button.active,
+    .status-bar button:hover {fill:#fff;}
+
+    /* TITLE */
+    .title {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:.6rem;
+      margin-bottom:2rem;
+    }
+    .title h1 {color:#fff;}
+  </style>
+</head>
+<body>
+  <canvas id="particles"></canvas>
+
+  <!-- Home Page -->
+  <div id="homePage" class="container">
+    <div class="title">
+      <!-- Logo Lingkaran SVG -->
+      <!-- Logo dari URL -->
+<img src="https://pomf2.lain.la/f/5k3pavpi.jpg" 
+     alt="Galaxy Logo" 
+     style="width:110px;height:110px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 15px rgba(187,134,252,0.6);"/>
+      <!-- Nama Store -->
+      <h1>XyzzMoods Store</h1>
+    </div>
+
+    <div class="product-grid" id="productGrid"></div>
+
+    <!-- Spotify Player -->
+    <div class="spotify">
+      <iframe style="border-radius:12px" 
+        src="https://open.spotify.com/embed/playlist/2ZdAbrVbOnTy8dJALpMuEU"
+        width="100%" height="180" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <!-- Cart Page -->
+  <div id="cartPage" class="container">
+    <div class="title">
+      <!-- Cart SVG -->
+      <svg width="32" height="32" viewBox="0 0 24 24"><path d="M7 4h-2l-1 2H1v2h2l3.6 7.59-1.35 2.44A1.99 1.99 0 0 0 7 20h12v-2H7l1.1-2h7.45a1 1 0 0 0 .9-.55l3.58-6.49A1 1 0 0 0 19 8H6.21l-.94-2z"/></svg>
+      <h1>Keranjang Saya</h1>
+    </div>
+    <div id="cartItems" class="cart-list"></div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <button onclick="showPage('home')" id="homeBtn">
+      <!-- Home SVG -->
+      <svg width="28" height="28" viewBox="0 0 24 24"><path d="M3 9.5l9-7 9 7V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z"/></svg>
+    </button>
+    <button onclick="showPage('cart')" id="cartBtn">
+      <!-- Cart SVG -->
+      <svg width="28" height="28" viewBox="0 0 24 24"><path d="M7 4h-2l-1 2H1v2h2l3.6 7.59-1.35 2.44A1.99 1.99 0 0 0 7 20h12v-2H7l1.1-2h7.45a1 1 0 0 0 .9-.55l3.58-6.49A1 1 0 0 0 19 8H6.21l-.94-2z"/></svg>
+    </button>
+  </div>
+
+  <script>
+    /* GANTI LINK RAW GITHUB JSON DI SINI */
+    const dataURL = "https://raw.githubusercontent.com/XyzzMoods/My-Website/refs/heads/main/produk.json";
+
+    async function loadProducts() {
+      try {
+        let res = await fetch(dataURL);
+        let products = await res.json();
+        let grid = document.getElementById("productGrid");
+        grid.innerHTML = "";
+
+        products.forEach((p, i) => {
+          let card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <h3>${p.nama}</h3>
+            <p class="price">${p.harga}</p>
+            <button class="btn" onclick="addToCart('${p.nama}','${p.harga}')">Tambah ke Keranjang</button>
+          `;
+          grid.appendChild(card);
+        });
+      } catch (e) {
+        console.error("Gagal load produk:", e);
+      }
+    }
+
+    /* PAGE SWITCH */
+    function showPage(page) {
+      document.getElementById("homePage").style.display = (page==='home') ? 'block':'none';
+      document.getElementById("cartPage").style.display = (page==='cart') ? 'block':'none';
+      document.getElementById("homeBtn").classList.toggle("active",page==='home');
+      document.getElementById("cartBtn").classList.toggle("active",page==='cart');
+    }
+    showPage('home');
+
+    /* CART */
+    let cart = [];
+    function addToCart(name, price) {
+      cart.push({name, price});
+      renderCart();
+      alert(name+" ditambahkan ke keranjang!");
+    }
+    function renderCart() {
+      let container=document.getElementById("cartItems");
+      container.innerHTML="";
+      cart.forEach((item,idx)=>{
+        let div=document.createElement("div");
+        div.className="cart-item";
+        div.innerHTML=`
+          <div>
+            <h4>${item.name}</h4>
+            <p>${item.price}</p>
+          </div>
+          <div class="cart-buttons">
+            <button class="btn" onclick="checkout(${idx})">Checkout</button>
+            <button class="btn" style="background:#ff4d6d" onclick="removeItem(${idx})">Hapus</button>
+          </div>`;
+        container.appendChild(div);
+      });
+    }
+    function checkout(index){
+      let item=cart[index];
+      let text=`Product: ${item.name}%0A`+
+               `Harga: ${item.price}%0A`+
+               `Payment: Isi...`;
+      window.open(`https://t.me/XyzzMoodss?text=${text}`,'_blank');
+    }
+    function removeItem(index){
+      cart.splice(index,1);
+      renderCart();
+    }
+
+    /* LOAD PRODUK SAAT MULAI */
+    loadProducts();
+
+    /* PARTICLES NETWORK */
+    const canvas=document.getElementById("particles");
+    const ctx=canvas.getContext("2d");
+    let w,h,particles=[];
+    function resize(){
+      w=canvas.width=window.innerWidth;
+      h=canvas.height=window.innerHeight;
+    }
+    window.addEventListener("resize",resize);
+    resize();
+
+    class Particle{
+      constructor(){
+        this.x=Math.random()*w;
+        this.y=Math.random()*h;
+        this.vx=(Math.random()-0.5)*1.2;
+        this.vy=(Math.random()-0.5)*1.2;
+        this.radius=2;
+      }
+      update(){
+        this.x+=this.vx;
+        this.y+=this.vy;
+        if(this.x<0||this.x>w)this.vx*=-1;
+        if(this.y<0||this.y>h)this.vy*=-1;
+      }
+      draw(){
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+        ctx.fillStyle="#bb86fc";
+        ctx.fill();
+      }
+    }
+    function init(){
+      particles=[];
+      for(let i=0;i<40;i++){particles.push(new Particle());}
+    }
+    function animate(){
+      ctx.clearRect(0,0,w,h);
+      for(let i=0;i<particles.length;i++){
+        let p=particles[i];
+        p.update();
+        p.draw();
+        for(let j=i+1;j<particles.length;j++){
+          let q=particles[j];
+          let dx=p.x-q.x,dy=p.y-q.y,dist=Math.sqrt(dx*dx+dy*dy);
+          if(dist<120){
+            ctx.beginPath();
+            ctx.moveTo(p.x,p.y);
+            ctx.lineTo(q.x,q.y);
+            ctx.strokeStyle="rgba(187,134,252,"+(1-dist/120)+")";
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+    init();animate();
+  </script>
+</body>
+</html>
